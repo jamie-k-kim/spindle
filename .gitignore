@@ -1,0 +1,25 @@
+.DS_Store
+.env
+vlog.txt
+
+*.pyc
+*.whl
+*.g
+
+__pycache__/
+private/
+braid/
+.venv/
+venv/
+
+# Rust build artifacts
+py-spiral-quantum/target/
+py-spiral-quantum/Cargo.lock
+
+# Spiral build artifacts
+spiral-software/build/
+spiral-software/bin/
+
+# Ignore massive molecule files (100MB+)
+FCIDUMP/caffeine_80o102e.txt
+FCIDUMP/tryptophan_87o108e.txt

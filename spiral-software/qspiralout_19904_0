@@ -1,0 +1,529 @@
+Tensor(
+  qRz(0.0) * qRy(3.1415926535897931), 
+  I(2), 
+  CNOT(1, 0)
+) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(3.1415926535897931), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(
+  qRz(0.0) * qRy(0.0) * qRz(0.0) * qRz(0.0), 
+  I(8)
+) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(CNOT(1, 0), qRz(-0.78539816339744806), I(2)) * 
+Tensor(
+  qRz(0.0) * qRz(0.0) * qRy(0.0) * qRz(0.0), 
+  I(8)
+) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(
+  qRy(-0.7853981633974485), 
+  qRy(0.0) * qRz(0.0), 
+  I(4)
+) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(qRy(-0.7853981633974485), I(8)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(
+  qRz(0.0) * qRy(0.0) * qRz(0.0), 
+  I(8)
+) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(
+  qRy(0.0) * qRz(0.0), 
+  I(2), 
+  CNOT(1, 1)
+) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(
+  CNOT(1, 0) * CNOT(1, 1), 
+  I(4)
+) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(qRz(0.0), I(8)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(
+  qRy(0.0) * qRz(3.1415926535897931) * qRz(0.0), 
+  I(8)
+) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(qRz(0.0), I(8)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(qRz(0.0), I(8)) * 
+Tensor(
+  CNOT(1, 1), 
+  qRz(0.78539816339744806) * qRz(0.0) * qRy(0.0), 
+  I(2)
+) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(-2.3561944901923448), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(
+  CNOT(1, 0) * CNOT(1, 1), 
+  I(4)
+) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(
+  CNOT(1, 0), 
+  qRz(0.0) * qRy(0.0), 
+  I(2)
+) * 
+Tensor(qRz(0.0), I(8)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(I(2), qRz(1.5707963267948966), CNOT(1, 0)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(qRz(0.0), I(2), CNOT(1, 0)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(
+  CNOT(1, 1), 
+  qRy(0.0) * qRz(0.0), 
+  I(2)
+) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(
+  I(4), 
+  qRy(3.1415926535897931) * qRz(3.1415926535897931) * qRz(0.0), 
+  I(2)
+) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(I(4), qRz(0.0), I(2)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(
+  I(4), 
+  qRz(0.0) * qRz(0.0) * qRy(0.0), 
+  I(2)
+) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRz(-0.78539816339744806), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(8), qRy(0.0)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRy(-0.7853981633974485), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(8), qRy(-0.7853981633974485)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(
+  CNOT(1, 0), 
+  I(2), 
+  qRy(0.0) * qRz(0.0)
+) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(I(4), qRy(0.0), I(2)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 1), I(2), qRz(0.0)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(I(4), qRz(0.0), I(2)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(3.1415926535897931), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 1), I(2), qRz(0.0)) * 
+Tensor(I(8), qRz(0.0)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(I(8), qRz(0.78539816339744806)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(-2.3561944901923448), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(
+  CNOT(1, 0) * CNOT(1, 1), 
+  I(4)
+) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(CNOT(1, 0), I(2), qRz(0.0)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(
+  qRz(0.0) * qRy(0.0) * qRz(0.0) * qRz(0.0) * qRy(0.0) * qRz(0.0), 
+  I(8)
+) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(CNOT(1, 0), qRy(-0.78539816339744828), I(2)) * 
+Tensor(
+  qRy(0.0) * qRz(0.0) * qRy(-0.78539816339744828) * qRz(0.0) * qRy(0.0) * qRz(0.0) * qRz(0.0) * qRy(0.0) * qRz(0.0), 
+  I(8)
+) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(qRy(0.0), I(8)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(
+  CNOT(1, 0) * CNOT(1, 1), 
+  I(4)
+) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(qRy(0.0), I(8)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(3.1415926535897931), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(qRz(0.0), I(2), CNOT(1, 1)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(qRz(0.0), I(2), CNOT(1, 1)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 1, 0, 2, 3 ], 1) * 
+Tensor(qRz(-1.5707963267948966), I(8)) * 
+Junc([ 1, 0, 2, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(qRz(0.0), I(2), CNOT(1, 0)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 1), qRy(0.0), I(2)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(qRz(2.3561944901923448), I(8)) * 
+Tensor(
+  CNOT(1, 0) * CNOT(1, 1), 
+  I(4)
+) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(
+  CNOT(1, 1), 
+  I(2), 
+  qRy(0.0) * qRz(0.0)
+) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(
+  CNOT(1, 0), 
+  I(2), 
+  qRy(0.0) * qRz(0.0) * qRz(0.0)
+) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(
+  CNOT(1, 0), 
+  I(2), 
+  qRz(0.0) * qRz(0.0) * qRy(0.0)
+) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(
+  CNOT(1, 0) * CNOT(1, 1), 
+  I(4)
+) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(1.5707963267948966), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(8), qRy(0.0)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRy(-0.78539816339744828), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRy(-0.78539816339744828), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(CNOT(1, 0), I(2), qRz(0.0)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(
+  CNOT(1, 0), 
+  I(2), 
+  qRz(0.0) * qRy(0.0) * qRz(0.0) * qRz(0.0)
+) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 3, 0, 1, 2 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 3, 0, 1, 2 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(
+  I(4), 
+  qRz(3.1415926535897931), 
+  qRz(0.0) * qRy(0.0)
+) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(8), qRz(-1.5707963267948966)) * 
+Tensor(CNOT(1, 0), I(4)) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRz(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 0)) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Junc([ 2, 0, 1, 3 ], 1) * 
+Tensor(qRy(0.0), I(8)) * 
+Junc([ 2, 0, 1, 3 ], -1) * 
+Tensor(I(4), CNOT(1, 1)) * 
+Tensor(CNOT(1, 1), I(4)) * 
+Tensor(I(8), qRz(2.3561944901923448))
