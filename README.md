@@ -77,7 +77,7 @@ Otherwise, you'll need to generate the FCIDUMPs first:
 6. Go to `fcidump.py` and add your molecule to the molecules list.
 8. Following the provided examples, set the molecule's "geom" field to the .xyz file.
 9. Add additional fields (charge, spin, basis, etc.) if needed.
-9. Execute the `fcidump.py` script.
+9. Execute the script.
 
 ### Running with Default Settings
 Spindle is configured purely through YAML files, so you can easily reuse and share your setups. If you run `main.py` without specifying a config file, Spindle will generate a fresh `config/default.yaml` file, populate it with the default values, and run the pipeline using those.
