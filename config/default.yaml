@@ -11,7 +11,7 @@ min_count: 1
 use_spiral: true
 real_qpu: false
 backend: null
-shots: 10000
+shots: 100000
 connectivity: heavy-hex
 lucj_reps: 2
 lucj_tol: 1.0e-05

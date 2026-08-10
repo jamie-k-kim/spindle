@@ -163,7 +163,7 @@ def iterative_trim_sqd(counts, h1e, h2e, norb, nelec, h0e, trim_fraction=0.10, s
         
     return prev_energy, rdm1, rdm2, valid_ratio
 
-def run(mf, config, t1=None, t2=None, norb=None, nelec=None, h1e=None, h2e=None, h0e=None) -> SolverResult:
+def run(mf, config, t1=None, t2=None, norb=None, nelec=None, h1e=None, h2e=None, h0e=None, backend=None) -> SolverResult:
     """
     Run quantum compilation and execution.
     """
@@ -194,7 +194,8 @@ def run(mf, config, t1=None, t2=None, norb=None, nelec=None, h1e=None, h2e=None,
         return SolverResult(energy=0.0)
 
     # 2. Connect backend early
-    backend = connect_backend(use_real_qpu=config.real_qpu, specific_backend=config.backend)
+    if backend is None:
+        backend = connect_backend(use_real_qpu=config.real_qpu, specific_backend=config.backend)
 
     # 3. Decompose ffsim gates into basis gates
     try:

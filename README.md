@@ -55,10 +55,32 @@ INSTANCE_CRN=<your_instance_crn>
 
 # Usage
 
-Spindle is configured purely through YAML config files, so you can easily reuse and share your exact experimental setups.
+### Generating the Molecule Files (FCIDUMPs)
+
+Before you use Spindle, you need to add molecules to the `FCIDUMP/` folder, which will be empty at first. The `fcidump.py` script, which is provided, will generate ~30 sample molecules ranging from 2 to 90 orbitals. This will help you get started.
+
+```bash
+python fcidump.py
+```
+
+### Adding Your Own Molecules
+
+If your molecules are already in FCIDUMP format, you can simply drag them into the `FCIDUMP/` folder.
+
+Otherwise, you'll need to generate the FCIDUMPs first:
+
+1. Search up a molecule on PubChem: https://pubchem.ncbi.nlm.nih.gov/compound
+2. Scroll down to the "3D Conformer" section.
+3. Click "Download Coordinates" and save the SDF file.
+4. Convert it to .xyz using [Open Babel](https://openbabel.org/) or an online converter.
+5. Drag the .xyz file into the `xyz/` folder.
+6. Go to `fcidump.py` and add your molecule to the molecules list.
+8. Following the provided examples, set the molecule's "geom" field to the .xyz file.
+9. Add additional fields (charge, spin, basis, etc.) if needed.
+9. Execute the `fcidump.py` script.
 
 ### Running with Default Settings
-If you run `main.py` without specifying a config file, Spindle will automatically generate a fresh `config/default.yaml` file populated with the default values:
+Spindle is configured purely through YAML files, so you can easily reuse and share your setups. If you run `main.py` without specifying a config file, Spindle will generate a fresh `config/default.yaml` file, populate it with the default values, and run the pipeline using those.
 
 ```bash
 python main.py FCIDUMP/my_molecule.txt
@@ -67,11 +89,9 @@ python main.py FCIDUMP/my_molecule.txt
 ### Running with Custom Settings
 In the `config/` directory, you can also create your own custom settings by copying and pasting `default.yaml` and editing the values. If you're not sure what a particular setting does, you can find descriptions for all of the settings in `config.py`.
 
-You only need to define the settings you want to change, as everything else will safely fall back to its default value. However, it's highly recommended to copy all of the fields in `default.yaml`, as the default values may change in future iterations of this software.
+You only need to define the settings you want to change; everything else will safely fall back to its default value. However, I recommend copying all of the fields in `default.yaml`, as the default values may change in future iterations of this software.
 
 Pass the config file as the second argument:
 ```bash
 python main.py FCIDUMP/my_molecule.txt config/my_run.yaml
 ```
-
-`FCIDUMP/` contains example molecules to run, but feel free to add your own!

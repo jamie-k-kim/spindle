@@ -34,11 +34,25 @@ def run(mf, config) -> float:
     num_fallback = 0
     num_skipped = 0
     
+    # 2.5 Connect to Quantum Backend once
+    from utils.ibm_utils import connect_backend
+    qpu_backend = None
+    if any(frag.n_orbitals > config.classical_threshold for frag in embedding_result.fragments.values()):
+        print(f"\n[Step 2.5] Connecting to Quantum Backend...")
+        qpu_backend = connect_backend(use_real_qpu=config.real_qpu, specific_backend=config.backend)
+
     for frag_id, fragment in embedding_result.fragments.items():
         vfrag = fragment.metadata["vayesta_fragment"]
         norb = fragment.n_orbitals
-        nelec = vfrag.cluster.nelec if hasattr(vfrag.cluster, 'nelec') else (fragment.n_electrons//2, fragment.n_electrons//2)
-        n_alpha, n_beta = nelec
+        if hasattr(vfrag, "cluster") and hasattr(vfrag.cluster, "nocc_active"):
+            nocc = vfrag.cluster.nocc_active
+            n_alpha = nocc
+            n_beta = nocc
+        else:
+            # Round to avoid float precision issues like 1.9999 // 2 = 0
+            nocc = min(norb, max(0, int(round(fragment.n_electrons) // 2)))
+            n_alpha = nocc
+            n_beta = nocc
         
         # Get cluster integrals from vayesta fragment
         h1e, h2e = vfrag._hamil.get_integrals()
@@ -79,7 +93,7 @@ def run(mf, config) -> float:
             t2 = c_res.metadata.get("t2")
             
             # 2. Run quantum solver logic with the precomputed amplitudes
-            q_res = quantum_solver.run(mf, config, t1=t1, t2=t2, norb=norb, nelec=(nocc, nocc), h1e=h1e, h2e=h2e, h0e=0.0)
+            q_res = quantum_solver.run(mf, config, t1=t1, t2=t2, norb=norb, nelec=(nocc, nocc), h1e=h1e, h2e=h2e, h0e=0.0, backend=qpu_backend)
             
             if q_res.rdm1 is None:
                 print(f"     Fragment {frag_id} returned no RDMs from QPU (empty/failed). Falling back to classical.")

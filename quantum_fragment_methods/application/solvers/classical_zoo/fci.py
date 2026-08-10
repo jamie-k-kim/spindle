@@ -172,6 +172,10 @@ class FCI(BaseSolver):
 
         # Compute reduced density matrices
         dm1, dm2 = fci_solver.make_rdm12(ci_vec, norb, nelec)
+        
+        # PySCF fci.make_rdm12 returns dm2 in physicist's notation (p^+ q^+ s r).
+        # We need it in chemist's notation (p^+ r^+ s q) to match CCSD and EWF conventions.
+        dm2 = dm2.transpose(0, 2, 1, 3)
 
         # Prepare metadata
         metadata = {

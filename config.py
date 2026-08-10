@@ -25,7 +25,7 @@ class RunConfig:
     use_spiral: bool = True             # Enables SPIRAL for circuit optimization.
     real_qpu: bool = False              # Use an actual IBM QPU instead of a simulator.
     backend: Optional[str] = None       # Specific name of the IBM QPU (e.g. ibm_brisbane).
-    shots: int = 10000                   # How many times to repeat the quantum experiment.
+    shots: int = 100000                 # How many times to repeat the quantum experiment.
     connectivity: str = "heavy-hex"     # How the qubits are wired together ("heavy-hex" or "square").
     lucj_reps: int = 2                  # How many layers of the ansatz to run (more layers = more accurate but more noise).
     lucj_tol: float = 1e-5              # Precision limit for the quantum math.
