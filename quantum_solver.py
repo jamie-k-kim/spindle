@@ -2,11 +2,7 @@ import psutil
 import numpy as np
 import ffsim
 import rustworkx as rx
-import concurrent.futures
-from functools import partial
-
 from qiskit import QuantumCircuit, QuantumRegister, qasm3
-from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager as runtime_pm
 from qiskit_ibm_runtime import SamplerV2 as Sampler
 
 import classical_solver
@@ -34,6 +30,9 @@ def check_resources(num_qubits, num_gates):
             f"Your system only has {sys_ram_gb:.1f} GB of available RAM. Execution terminated."
         )
 
+# VF2 call limit: matches the constant used in new_lucj_pass_manager for consistency.
+_VF2_CALL_LIMIT = 30_000_000
+
 def get_candidate_layouts(backend, norb, connectivity, pairs_aa, pairs_ab, pairs_bb=None, limit=3):
     if pairs_bb is None: pairs_bb = pairs_aa
     backend_coupling_graph = _make_backend_cmap_pygraph(backend, 1.0, 0.10)
@@ -41,27 +40,33 @@ def get_candidate_layouts(backend, norb, connectivity, pairs_aa, pairs_ab, pairs
         norb=norb, backend_coupling_graph=backend_coupling_graph,
         connectivity=connectivity, pairs_aa=pairs_aa, pairs_ab=pairs_ab, pairs_bb=pairs_bb
     )
+    virtual_edges = list(layout_graph.edge_list())
     layouts = []
-    if norb < 6:
-        try:
-            mappings = rx.vf2_mapping(backend_coupling_graph, layout_graph, subgraph=True, id_order=False, induced=False, call_limit=5000)
-            unique_sets = []
-            num_allowed = len(allowed_pairs_ab)
-            for mapping in mappings:
-                initial_layout = [-1] * (2 * norb + num_allowed)
-                for key, value in mapping.items(): initial_layout[value] = key
-                layout_cand = initial_layout[:-num_allowed]
-                if -1 not in layout_cand:
-                    q_set = frozenset(layout_cand)
-                    if q_set not in unique_sets:
-                        unique_sets.append(q_set)
-                        layouts.append((layout_cand, allowed_pairs_ab))
-                if len(layouts) >= limit: break
-        except Exception: pass
-        
+    try:
+        mappings = rx.vf2_mapping(
+            backend_coupling_graph, layout_graph,
+            subgraph=True, id_order=False, induced=False, call_limit=_VF2_CALL_LIMIT
+        )
+        unique_sets = []
+        num_allowed = len(allowed_pairs_ab)
+        for mapping in mappings:
+            initial_layout = [-1] * (2 * norb + num_allowed)
+            for key, value in mapping.items(): initial_layout[value] = key
+            
+            # Use the truncated layout just for uniqueness checking
+            layout_cand = initial_layout[:-num_allowed] if num_allowed > 0 else initial_layout
+            if -1 not in layout_cand:
+                q_set = frozenset(layout_cand)
+                if q_set not in unique_sets:
+                    unique_sets.append(q_set)
+                    # Yield the FULL layout so heuristic scorer can map ancilla edges, plus num_allowed to truncate later
+                    layouts.append((initial_layout, num_allowed))
+            if len(layouts) >= limit: break
+    except Exception: pass
+
     if len(layouts) == 0:
-        layouts.append((None, allowed_pairs_ab))
-    return layouts
+        layouts.append((None, len(allowed_pairs_ab)))
+    return layouts, virtual_edges
 
 def parse_circuit_to_spiral(circuit):
     gates = []
@@ -186,16 +191,53 @@ def run(mf, config, t1=None, t2=None, norb=None, nelec=None, h1e=None, h2e=None,
             c_res.metadata["valid_ratio"] = "100.0% (Exact Classical)"
             return c_res
 
-    lucj_config = {"n_reps": config.lucj_reps, "optimize": config.lucj_optimize, "method": config.lucj_method}
+    # 1. Connect backend early so its topology can inform circuit generation
+    if backend is None:
+        backend = connect_backend(use_real_qpu=config.real_qpu, specific_backend=config.backend)
+
+    # 1.5. Prepare Hamiltonian components early for auto-tuning scoring
+    if h1e is None:
+        h1e = mf.get_hcore()
+    if h2e is None:
+        from pyscf import ao2mo
+        h2e = ao2mo.restore(1, mf._eri, norb)
+    if h0e is None:
+        h0e = mf.mol.energy_nuc()
+
+    lucj_config = {"n_reps": getattr(config, "lucj_reps", 1), "optimize": getattr(config, "lucj_optimize", True), "method": getattr(config, "lucj_method", "L-BFGS-B")}
+    use_spanning_tree = getattr(config, "use_spanning_tree", False)
+    connectivity = getattr(config, "connectivity", "heavy-hex")
+
+    # Pre-compute spanning tree interaction pairs once here so they can be shared
+    # between build_lucj_circuit (ffsim ansatz) and SPIRAL's virtual_coupling,
+    # avoiding a duplicate call and ensuring both always agree on the same topology.
+    precomputed_interaction_pairs = None
+    if use_spanning_tree and connectivity == "square":
+        from utils.new_lucj_pass_manager import get_spanning_tree_interaction_pairs
+        max_orbital_index = min(12, norb - 1)
+        _pairs_aa = [(p, p + 1) for p in range(norb - 1)]
+        _pairs_ab = [(p, p) for p in range(0, max_orbital_index + 1, 4)]
+        precomputed_interaction_pairs = get_spanning_tree_interaction_pairs(
+            backend=backend,
+            norb=norb,
+            connectivity="square",
+            pairs_aa=_pairs_aa,
+            pairs_ab=_pairs_ab,
+            pairs_bb=_pairs_aa,
+        )
+
     try:
-        frag_qc = build_lucj_circuit(t1, t2, norb, nelec, config=lucj_config)
+        frag_qc = build_lucj_circuit(
+            t1, t2, norb, nelec,
+            config=lucj_config,
+            backend=backend,
+            connectivity=connectivity,
+            use_spanning_tree=use_spanning_tree,
+            precomputed_interaction_pairs=precomputed_interaction_pairs,
+        )
     except Exception as e:
         print(f"     Failed to build LUCJ circuit: {e}")
         return SolverResult(energy=0.0)
-
-    # 2. Connect backend early
-    if backend is None:
-        backend = connect_backend(use_real_qpu=config.real_qpu, specific_backend=config.backend)
 
     # 3. Decompose ffsim gates into basis gates
     try:
@@ -211,9 +253,20 @@ def run(mf, config, t1=None, t2=None, norb=None, nelec=None, h1e=None, h2e=None,
         return SolverResult(energy=0.0)
 
     # 4. SPIRAL parse and compile
-    if config.use_spiral and py_spiral_quantum is not None:
+    if getattr(config, "use_spiral", False) and py_spiral_quantum is not None:
         spiral_gates = parse_circuit_to_spiral(frag_qc)
-        virtual_coupling = [(i, i + 1) for i in range(2 * norb - 1)]
+        
+        # Full SABRE bypass: pass spanning tree edges to SPIRAL virtual_coupling.
+        # Re-use precomputed_interaction_pairs from above to avoid a second VF2 call.
+        if precomputed_interaction_pairs is not None:
+            p_aa, p_ab, p_bb = precomputed_interaction_pairs
+            virtual_coupling = (
+                [(i, j) for i, j in p_aa] +
+                [(i + norb, j + norb) for i, j in p_bb] +
+                [(i, j + norb) for i, j in p_ab]
+            )
+        else:
+            virtual_coupling = [(i, i + 1) for i in range(2 * norb - 1)]
         
         if not spiral_gates:
             print(f"     No significant excitations found (empty circuit). Skipping compilation.")
@@ -239,28 +292,128 @@ def run(mf, config, t1=None, t2=None, norb=None, nelec=None, h1e=None, h2e=None,
     # 5. Measurements
     transpiled_qc.measure_all()
     
-    # 6. ISA mapping
+    # 6. ISA mapping & Auto-Tuning
     print(f"     Mapping to physical ISA for {backend.name}...")
     try:
-        pm = runtime_pm(backend=backend, optimization_level=1)
+        from utils.new_lucj_pass_manager import generate_lucj_pass_manager
+        max_orbital_index = min(12, norb - 1)
+        pairs_aa = [(p, p + 1) for p in range(norb - 1)]
+        pairs_ab = [(p, p) for p in range(0, max_orbital_index + 1, 4)]
+        
+        num_layouts = getattr(config, "num_layouts", 1)
+        best_layout = None
+        
+        if num_layouts > 1:
+            print(f"     Running pre-flight auto-tuning sweep with {num_layouts} candidate layouts...")
+            
+            # Setup the unwrapped calibration backend for heuristic scoring
+            if getattr(config, "connectivity", "heavy-hex") == "square":
+                from qiskit.providers.fake_provider import GenericBackendV2
+                from qiskit.transpiler import CouplingMap
+                cmap = CouplingMap.from_grid(num_rows=4, num_columns=4)
+                calibration_backend = GenericBackendV2(num_qubits=16, coupling_map=cmap)
+            else:
+                from qiskit_ibm_runtime.fake_provider import FakeBrisbane
+                calibration_backend = FakeBrisbane()
+                
+            candidate_layouts, virtual_edges = get_candidate_layouts(
+                backend, norb, getattr(config, "connectivity", "heavy-hex"), pairs_aa, pairs_ab, limit=num_layouts
+            )
+            
+            # --- Stage 1: Heuristic Pre-Filter ---
+            from quantum_fragment_methods.application.solvers.quantum_zoo.utils.lucj import lightweight_layout_error_scoring
+            from quantum_fragment_methods.application.solvers.quantum_zoo.utils.lucj import IBM_TWO_Q_GATES
+            
+            valid_candidates = [cand for cand in candidate_layouts if cand[0] is not None]
+            valid_layouts = [cand[0] for cand in valid_candidates]
+            
+            try:
+                try:
+                    two_q_gate_name = IBM_TWO_Q_GATES.intersection(calibration_backend.configuration().basis_gates).pop()
+                except:
+                    two_q_gate_name = "cx"
+                scored = lightweight_layout_error_scoring(
+                    backend=calibration_backend,
+                    virtual_edges=virtual_edges,
+                    physical_layouts=valid_layouts,
+                    two_q_gate_name=two_q_gate_name
+                )
+            except Exception:
+                # If heuristic scoring fails (e.g. GenericBackendV2 has no .properties()), fall back
+                scored = [[layout, float(i)] for i, layout in enumerate(valid_layouts)]
+                
+            tuning_top_candidates = getattr(config, "tuning_top_candidates", 3)
+            top_scored = scored[:tuning_top_candidates]
+            
+            # Truncate ancillas for ISA mapping
+            layout_to_num_allowed = {tuple(cand[0]): cand[1] for cand in valid_candidates}
+            top_candidates = []
+            for layout, _ in top_scored:
+                num_allowed = layout_to_num_allowed[tuple(layout)]
+                truncated_layout = layout[:-num_allowed] if num_allowed > 0 else layout
+                top_candidates.append(truncated_layout)
+                
+            # --- Stage 2: Simulation Tie-Breaker ---
+            tuning_sim_threshold = getattr(config, "tuning_sim_threshold", 20)
+            
+            if (2 * norb) <= tuning_sim_threshold and tuning_sim_threshold > 0:
+                print(f"     Stage 2: Running simulation tie-breaker on top {len(top_candidates)} candidates...")
+                from qiskit_aer import AerSimulator
+                sweep_backend = AerSimulator.from_backend(calibration_backend)
+                
+                best_score = float("inf")
+                for trunc_layout in top_candidates:
+                    pm, _ = generate_lucj_pass_manager(
+                        backend=backend,
+                        norb=norb,
+                        connectivity=getattr(config, "connectivity", "heavy-hex"),
+                        interaction_pairs=(pairs_aa, pairs_ab, pairs_aa),
+                        initial_layout=trunc_layout,
+                        optimization_level=1
+                    )
+                    sweep_circuit = pm.run(transpiled_qc)
+                    sweep_result = run_circuit(sweep_circuit, sweep_backend, shots=10000)
+                    sweep_counts = get_counts(sweep_result)
+                    
+                    e_trim, _, _, _ = iterative_trim_sqd(
+                        sweep_counts, h1e, h2e, norb, nelec, h0e, 
+                        trim_fraction=getattr(config, "trim_fraction", 0.10), 
+                        stop_tol=getattr(config, "trim_stop_tol", 1e-4)
+                    )
+                    
+                    if e_trim is not None and e_trim < best_score:
+                        best_score = e_trim
+                        best_layout = trunc_layout
+                
+                print(f"     Best auto-tuned layout energy: {best_score}")
+            else:
+                print(f"     Circuit too large for simulation (2*norb={2*norb} > {tuning_sim_threshold}). Bypassing Stage 2.")
+                best_layout = top_candidates[0]
+        else:
+            from quantum_fragment_methods.application.solvers.quantum_zoo.utils.lucj import get_zigzag_physical_layout
+            best_layout, _ = get_zigzag_physical_layout(
+                norb, backend, score_layouts=True, connectivity=getattr(config, "connectivity", "heavy-hex")
+            )
+            
+        pm, _ = generate_lucj_pass_manager(
+            backend=backend,
+            norb=norb,
+            connectivity=getattr(config, "connectivity", "heavy-hex"),
+            interaction_pairs=(pairs_aa, pairs_ab, pairs_aa),
+            initial_layout=best_layout,
+            optimization_level=1
+        )
         isa_circuit = pm.run(transpiled_qc)
+        swap_count = isa_circuit.count_ops().get('swap', 0)
+        print(f"     ISA Circuit generated. SWAP count: {swap_count}")
     except Exception as e:
         print(f"     ISA Mapping failed: {e}")
         return SolverResult(energy=0.0)
 
     # 7. Execute
     print(f"     Executing on backend...")
-    result = run_circuit(isa_circuit, backend, shots=config.shots if config.shots > 0 else 1024)
+    result = run_circuit(isa_circuit, backend, shots=getattr(config, "shots", 1024) if getattr(config, "shots", 1024) > 0 else 1024)
     counts = get_counts(result)
-
-    # Iterative TrimSQD
-    if h1e is None:
-        h1e = mf.get_hcore()
-    if h2e is None:
-        from pyscf import ao2mo
-        h2e = ao2mo.restore(1, mf._eri, norb)
-    if h0e is None:
-        h0e = mf.mol.energy_nuc()
 
     print(f"     Running Iterative TrimSQD Error Mitigation...")
     e_trim, rdm1, rdm2, valid_ratio = iterative_trim_sqd(

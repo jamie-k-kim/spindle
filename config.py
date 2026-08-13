@@ -17,12 +17,15 @@ class RunConfig:
     spiral_max_gates: int = 100000      # The absolute max number of gates allowed before we give up.
 
     # Auto-tuning
-    num_layouts: int = 10               # How many different ways to try placing the circuit onto the QPU.
+    num_layouts: int = 50               # How many different ways to try placing the circuit onto the QPU.
+    tuning_top_candidates: int = 3      # How many layouts survive the fast heuristic filter to enter simulation tie-breaker.
+    tuning_sim_threshold: int = 20      # Max qubits for simulation tie-breaker. Circuits larger than this skip simulation. Setting to 0 always skips. WARNING: Can silently stall pipeline for hours if set aggressively on underpowered hardware.
     beta: float = 0.001                 # Helps the program pick the most accurate QPU layout.
     min_count: int = 1                  # Throw away quantum results that occur less than this.
 
     # QPU
     use_spiral: bool = True             # Enables SPIRAL for circuit optimization.
+    use_spanning_tree: bool = True      # Spanning tree Givens elimination (works only if connectivity is square).
     real_qpu: bool = False              # Use an actual IBM QPU instead of a simulator.
     backend: Optional[str] = None       # Specific name of the IBM QPU (e.g. ibm_brisbane).
     shots: int = 100000                 # How many times to repeat the quantum experiment.
@@ -56,12 +59,11 @@ def load_config(path: str) -> RunConfig:
     import yaml
     import os
     
-    if not os.path.exists(path):
-        if path == "config/default.yaml":
-            generate_default_yaml(path)
-        else:
-            print(f"     [Warning] Config file {path} not found. Using defaults.")
-            return RunConfig()
+    if path == "config/default.yaml":
+        generate_default_yaml(path)
+    elif not os.path.exists(path):
+        print(f"     [Warning] Config file {path} not found. Using defaults.")
+        return RunConfig()
             
     with open(path, "r") as f:
         try:

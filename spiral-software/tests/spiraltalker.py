@@ -80,7 +80,7 @@ class SpiralTalker:
         return self  
 
 
-    def __exit__(self, type, value, tb):
+    def __exit__(self, type, value, _tb):
         self.__del__()
         return True
 

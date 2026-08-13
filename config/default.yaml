@@ -5,10 +5,13 @@ ewf_bath_type: mp2
 ewf_truncation: 1.0e-05
 spiral_chunk_size: 1000
 spiral_max_gates: 100000
-num_layouts: 10
+num_layouts: 50
+tuning_top_candidates: 3
+tuning_sim_threshold: 20
 beta: 0.001
 min_count: 1
 use_spiral: true
+use_spanning_tree: true
 real_qpu: false
 backend: null
 shots: 100000

@@ -151,11 +151,20 @@ def main():
     
     # Auto-Tuning
     config_table.add_row("Num Layouts:", str(config.num_layouts))
+    config_table.add_row("Top Candidates (Sim):", str(getattr(config, "tuning_top_candidates", 3)))
+    config_table.add_row("Sim Qubit Threshold:", str(getattr(config, "tuning_sim_threshold", 20)))
     config_table.add_row("Beta (Fidelity):", str(config.beta))
     config_table.add_row("Min Shot Count:", str(config.min_count))
     
     # QPU
-    config_table.add_row("SPIRAL Compilation:", "Enabled" if config.use_spiral else "Disabled")
+    config_table.add_row("SPIRAL Compilation:", "Enabled" if getattr(config, "use_spiral", True) else "Disabled")
+    
+    if getattr(config, "use_spanning_tree", False):
+        spanning_status = "Enabled" if getattr(config, "connectivity", "heavy-hex") == "square" else "Enabled (Unused)"
+    else:
+        spanning_status = "Disabled"
+    config_table.add_row("Spanning Tree:", spanning_status)
+    
     config_table.add_row("Real QPU:", str(config.real_qpu))
     if config.real_qpu:
         backend_str = config.backend if config.backend else "IBM Quantum"

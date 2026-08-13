@@ -28,6 +28,10 @@ import rustworkx
 from qiskit.providers import BackendV2
 from rustworkx import NoEdgeBetweenNodes, PyGraph
 
+# Import the canonical backend graph builder from new_lucj_pass_manager to avoid
+# duplicating logic. The version there includes error-threshold pruning; this one did not.
+from utils.new_lucj_pass_manager import _make_backend_cmap_pygraph as _make_backend_cmap_pygraph_canonical
+
 logger = logging.getLogger(__name__)
 
 IBM_TWO_Q_GATES = {"cx", "ecr", "cz"}
@@ -128,6 +132,31 @@ def create_lucj_zigzag_layout(
     return G_new, num_alpha_beta_qubits
 
 
+def create_lucj_square_layout(
+    num_orbitals: int, backend_coupling_graph: PyGraph
+) -> tuple[PyGraph, int]:
+    """This function creates the complete square graph that 'can be mapped' to a IBM QPU with
+    square connectivity (the graph must be an isomorphic sub-graph to the QPU/backend coupling graph).
+    In a square layout, alpha and beta linear chains are directly connected without ancilla qubits.
+    """
+    isomorphic = False
+    G = create_linear_chains(num_orbitals=num_orbitals)
+
+    num_iters = copy.deepcopy(num_orbitals)
+    while not isomorphic and num_iters > 0:
+        G_new = copy.deepcopy(G)
+        # connect alpha and beta chains directly
+        for n in range(num_iters):
+            G_new.add_edge(n, n + num_orbitals, None)
+            
+        isomorphic = rustworkx.is_subgraph_isomorphic(backend_coupling_graph, G_new)
+        if not isomorphic:
+            num_iters -= 1
+
+    return G_new, 0  # 0 because there are no ancilla qubits in the square layout
+
+
+
 def lightweight_layout_error_scoring(
     backend: BackendV2,
     virtual_edges: Sequence[Sequence[int]],
@@ -178,27 +207,14 @@ def lightweight_layout_error_scoring(
 
 
 def _make_backend_cmap_pygraph(backend: BackendV2) -> PyGraph:
-    graph = backend.coupling_map.graph
-    if not graph.is_symmetric():
-        graph.make_symmetric()
-    backend_coupling_graph = graph.to_undirected()
-
-    edge_list = backend_coupling_graph.edge_list()
-    removed_edge = []
-    for edge in edge_list:
-        if set(edge) in removed_edge:
-            continue
-        try:
-            backend_coupling_graph.remove_edge(edge[0], edge[1])
-            removed_edge.append(set(edge))
-        except NoEdgeBetweenNodes:
-            pass
-
-    return backend_coupling_graph
+    """Delegate to the canonical implementation in new_lucj_pass_manager, which
+    includes error-threshold pruning. Kept here for backward compatibility with
+    any direct callers in this module."""
+    return _make_backend_cmap_pygraph_canonical(backend, two_qubit_error_threshold=1.0, readout_error_threshold=0.10)
 
 
 def get_zigzag_physical_layout(
-    num_orbitals: int, backend: BackendV2, score_layouts: bool = True
+    num_orbitals: int, backend: BackendV2, score_layouts: bool = True, connectivity: str = "heavy-hex"
 ) -> tuple[list[int], int]:
     """The main function that generates the zigzag pattern with physical qubits that can be used
     as an `intial_layout` in a preset passmanager/transpiler.
@@ -209,6 +225,7 @@ def get_zigzag_physical_layout(
         score_layouts (bool): Optional. If `True`, it uses the `lightweight_layout_error_scoring`
             function to score the isomorphic layouts and returns the layout with less errorneous qubits.
             If `False`, returns the first isomorphic subgraph.
+        connectivity (str): Topology of the backend ("heavy-hex" or "square").
 
     Returns:
         A tuple of device compliant layout (list[int]) with zigzag pattern and an int representing
@@ -216,9 +233,14 @@ def get_zigzag_physical_layout(
     """
     backend_coupling_graph = _make_backend_cmap_pygraph(backend=backend)
 
-    G, num_aplha_beta_qubits = create_lucj_zigzag_layout(
-        num_orbitals=num_orbitals, backend_coupling_graph=backend_coupling_graph
-    )
+    if connectivity == "square":
+        G, num_aplha_beta_qubits = create_lucj_square_layout(
+            num_orbitals=num_orbitals, backend_coupling_graph=backend_coupling_graph
+        )
+    else:
+        G, num_aplha_beta_qubits = create_lucj_zigzag_layout(
+            num_orbitals=num_orbitals, backend_coupling_graph=backend_coupling_graph
+        )
 
     isomorphic_mappings = rustworkx.vf2_mapping(backend_coupling_graph, G, subgraph=True)
     isomorphic_mappings = list(isomorphic_mappings)
@@ -253,6 +275,10 @@ def build_lucj_circuit(
     norb: int,
     nelec: tuple[int, int],
     config: dict[str, Any] | None = None,
+    backend: BackendV2 | None = None,
+    connectivity: str = "heavy-hex",
+    use_spanning_tree: bool = False,
+    precomputed_interaction_pairs: tuple | None = None,
 ) -> Any:
     """Build LUCJ ansatz circuit from CCSD amplitudes.
 
@@ -311,18 +337,35 @@ def build_lucj_circuit(
         f"alpha-beta={len(alpha_beta_indices)}"
     )
 
-    # Build UCJ operator from t2 amplitudes
     logger.info(f"Optimizing LUCJ operator (n_reps={n_reps}, optimize={optimize})...")
     import time
 
     start_time = time.time()
+
+    if precomputed_interaction_pairs is not None:
+        # Caller already computed the spanning tree pairs — use them directly
+        # to avoid a redundant VF2 call.
+        interaction_pairs = (precomputed_interaction_pairs[0], precomputed_interaction_pairs[1])
+    elif backend is not None and use_spanning_tree and connectivity == "square":
+        from utils.new_lucj_pass_manager import get_spanning_tree_interaction_pairs
+        pairs_aa, pairs_ab, pairs_bb = get_spanning_tree_interaction_pairs(
+            backend=backend,
+            norb=norb,
+            connectivity=connectivity,
+            pairs_aa=alpha_alpha_indices,
+            pairs_ab=alpha_beta_indices,
+            pairs_bb=alpha_alpha_indices,
+        )
+        interaction_pairs = (pairs_aa, pairs_ab)
+    else:
+        interaction_pairs = (alpha_alpha_indices, alpha_beta_indices)
 
     try:
         ucj_op = ffsim.UCJOpSpinBalanced.from_t_amplitudes(
             t2=t2,
             # t1=t1,  # Optionally include t1 amplitudes
             n_reps=n_reps,
-            interaction_pairs=(alpha_alpha_indices, alpha_beta_indices),
+            interaction_pairs=interaction_pairs,
             optimize=optimize,
             method=method,
             options={"maxiter": maxiter},

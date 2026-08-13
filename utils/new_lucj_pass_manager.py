@@ -359,6 +359,90 @@ def _get_placeholder_layout_and_allowed_interactions(
     return initial_layout[:-num_allowed_pairs_ab], allowed_pairs_ab
 
 
+def classify_spanning_tree_edges(
+    tree_edges: list[tuple[int, int]],
+    norb: int,
+    initial_layout: list[int],
+) -> tuple[list[tuple[int, int]], list[tuple[int, int]], list[tuple[int, int]]]:
+    """Map physical tree edges back to logical orbital pairs and classify them."""
+    pairs_aa = []
+    pairs_ab = []
+    pairs_bb = []
+    
+    for u, v in tree_edges:
+        # map back to logical using initial_layout
+        log_u = initial_layout.index(u)
+        log_v = initial_layout.index(v)
+        
+        # order them for consistency
+        if log_u > log_v:
+            log_u, log_v = log_v, log_u
+            
+        if log_v < norb:
+            pairs_aa.append((log_u, log_v))
+        elif log_u >= norb:
+            pairs_bb.append((log_u - norb, log_v - norb))
+        else:
+            pairs_ab.append((log_u, log_v - norb))
+            
+    return pairs_aa, pairs_ab, pairs_bb
+
+
+def get_spanning_tree_interaction_pairs(
+    backend: BackendV2,
+    norb: int,
+    connectivity: Literal["heavy-hex", "square"],
+    pairs_aa: list[tuple[int, int]],
+    pairs_ab: list[tuple[int, int]],
+    pairs_bb: list[tuple[int, int]],
+    two_qubit_error_threshold: float = 1.0,
+    readout_error_threshold: float = 0.10,
+) -> tuple[list[tuple[int, int]], list[tuple[int, int]], list[tuple[int, int]]]:
+    """Extract spanning tree interaction pairs from a VF2 physical layout subgraph."""
+    if connectivity == "heavy-hex":
+        return pairs_aa, pairs_ab, pairs_bb
+        
+    initial_layout, _ = _get_placeholder_layout_and_allowed_interactions(
+        backend=backend,
+        norb=norb,
+        connectivity=connectivity,
+        pairs_aa=pairs_aa,
+        pairs_ab=pairs_ab,
+        pairs_bb=pairs_bb,
+        two_qubit_error_threshold=two_qubit_error_threshold,
+        readout_error_threshold=readout_error_threshold,
+    )
+    
+    # build a subgraph from the selected physical qubits
+    subgraph = rustworkx.PyGraph()
+    # Add nodes using the physical qubit indices as weights
+    for q in initial_layout:
+        subgraph.add_node(q)
+        
+    cmap_graph = backend.coupling_map.graph.to_undirected()
+    
+    # Add edges between our nodes if they exist in cmap_graph
+    for i in range(len(initial_layout)):
+        for j in range(i + 1, len(initial_layout)):
+            q_i = initial_layout[i]
+            q_j = initial_layout[j]
+            if cmap_graph.has_edge(q_i, q_j):
+                subgraph.add_edge(i, j, None)
+                
+    # extract spanning tree edges using DFS from first node
+    tree_edges = rustworkx.dfs_edges(subgraph, source=0)
+    
+    # rustworkx dfs_edges returns (source_idx, target_idx) where indices are 0,1,2...
+    physical_tree_edges = []
+    for edge in tree_edges:
+        u = initial_layout[edge[0]]
+        v = initial_layout[edge[1]]
+        physical_tree_edges.append((u, v))
+        
+    return classify_spanning_tree_edges(physical_tree_edges, norb, initial_layout)
+
+
+
 def generate_lucj_pass_manager(
     backend: BackendV2,
     norb: int,
@@ -440,9 +524,7 @@ def generate_lucj_pass_manager(
 
     .. _`Motta, Sung, Whaley, Head-Gordon, and Shee, "Bridging physical intuition and hardware efficiency for correlated electronic states: the local unitary cluster Jastrow ansatz for electronic structure." (2023)`: https://pubs.rsc.org/en/content/articlehtml/2023/sc/d3sc02516k
     """  # noqa: E501
-    if "initial_layout" in qiskit_pm_kwargs:
-        warnings.warn("Argument ``initial_layout`` is ignored.")
-        del qiskit_pm_kwargs["initial_layout"]
+    provided_initial_layout = qiskit_pm_kwargs.pop("initial_layout", None)
 
     if "layout_method" in qiskit_pm_kwargs:
         warnings.warn("Argument ``layout_method`` is ignored.")
@@ -483,18 +565,22 @@ def generate_lucj_pass_manager(
     else:
         resolved_pairs_ab = copy.deepcopy(pairs_ab)
 
-    (placeholder_initial_layout, allowed_pairs_ab) = (
-        _get_placeholder_layout_and_allowed_interactions(
-            backend=backend,
-            norb=norb,
-            connectivity=connectivity,
-            pairs_ab=resolved_pairs_ab,
-            two_qubit_error_threshold=two_qubit_error_threshold,
-            readout_error_threshold=readout_error_threshold,
-            pairs_aa=pairs_aa,
-            pairs_bb=pairs_bb,
+    if provided_initial_layout is not None:
+        placeholder_initial_layout = provided_initial_layout
+        allowed_pairs_ab = resolved_pairs_ab
+    else:
+        (placeholder_initial_layout, allowed_pairs_ab) = (
+            _get_placeholder_layout_and_allowed_interactions(
+                backend=backend,
+                norb=norb,
+                connectivity=connectivity,
+                pairs_ab=resolved_pairs_ab,
+                two_qubit_error_threshold=two_qubit_error_threshold,
+                readout_error_threshold=readout_error_threshold,
+                pairs_aa=pairs_aa,
+                pairs_bb=pairs_bb,
+            )
         )
-    )
 
     pm = generate_preset_pass_manager(
         backend=backend, initial_layout=placeholder_initial_layout, **qiskit_pm_kwargs
