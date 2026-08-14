@@ -75,7 +75,7 @@ Otherwise, you'll need to generate the FCIDUMPs first:
 4. Convert it to .xyz using [Open Babel](https://openbabel.org/) or an online converter.
 5. Drag the .xyz file into the `xyz/` folder.
 6. Go to `fcidump.py` and add your molecule to the molecules list.
-8. Following the provided examples, set the molecule's "geom" field to the .xyz file.
+8. Following the provided examples, set the molecule's `geom` field to the .xyz file.
 9. Add additional fields (charge, spin, basis, etc.) if needed.
 9. Execute the script.
 
@@ -95,3 +95,14 @@ Pass the config file as the second argument:
 ```bash
 python main.py FCIDUMP/my_molecule.txt config/my_run.yaml
 ```
+
+### Injecting Custom Circuits
+
+Instead of automatically generating the LUCJ ansatz from the FCIDUMP, you can also use a pre-made circuit. The repository has an empty `circuits/` folder, where you can place your .qpy or .qasm files (Spindle supports both).
+
+```bash
+python main.py FCIDUMP/my_molecule.txt [optional config] circuits/my_circuit.qpy
+```
+
+> [!NOTE]
+> Spindle recognizes FCIDUMPs, config files, and custom circuits by file extension, so the order of the arguments doesn't matter.
