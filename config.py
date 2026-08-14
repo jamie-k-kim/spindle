@@ -6,7 +6,7 @@ class RunConfig:
     # Routing
     qpu_threshold: int = 40             # Largest size to run on the QPU. Split anything bigger.
     classical_threshold: int = 20       # If a fragment is this small, solve it classically.
-    fci_threshold: int = 6              # If a fragment is this small, solve classically with exact FCI.
+    fci_threshold: int = 10             # If a fragment is this small, solve classically with exact FCI.
     
     # EWF
     ewf_bath_type: str = "mp2"          # Method used to surround and protect the fragments.
@@ -24,6 +24,7 @@ class RunConfig:
     min_count: int = 1                  # Throw away quantum results that occur less than this.
 
     # QPU
+    transpile_optimization_level: int = 1  # Qiskit optimization level for ISA mapping (0-3).
     use_spiral: bool = True             # Enables SPIRAL for circuit optimization.
     use_spanning_tree: bool = True      # Spanning tree Givens elimination (works only if connectivity is square).
     real_qpu: bool = False              # Use an actual IBM QPU instead of a simulator.

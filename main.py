@@ -9,7 +9,6 @@ from pyscf import tools
 import pyscf.gto
 
 # Local Imports
-from config import RunConfig
 import classical_solver
 import quantum_solver
 import frag_manager
@@ -44,25 +43,48 @@ def main():
     start_timestamp = datetime.datetime.now()
     start_time = time.perf_counter()
 
-    parser = argparse.ArgumentParser(description="Universal Quantum Chemistry Pipeline (SPIRAL + EWF)")
-    
-    # Load default configuration as the single source of truth for CLI defaults
-    default_config = RunConfig()
-    
-    # Core Inputs
-    parser.add_argument("mol_file", type=str, help="Path to FCIDUMP file")
-    parser.add_argument("config", type=str, nargs="?", default="config/default.yaml", help="Path to YAML configuration file")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("files", nargs="*", help="Input files (FCIDUMP, YAML config, QASM circuit) in any order")
     
     args = parser.parse_args()
 
-    # Load Configuration from YAML
+    mol_file = None
+    config_file = None
+    custom_circuit_path = None
+    
+    for f in args.files:
+        ext = os.path.splitext(f)[1].lower()
+        if ext in [".yaml", ".yml"]:
+            if config_file is not None and config_file != f:
+                print(f"[Error] Multiple config files provided: {config_file} and {f}")
+                return
+            config_file = f
+        elif ext in [".qasm", ".qpy"]:
+            if custom_circuit_path is not None:
+                print(f"[Error] Multiple custom circuits provided: {custom_circuit_path} and {f}")
+                return
+            custom_circuit_path = f
+        else:
+            if mol_file is not None:
+                print(f"[Error] Multiple FCIDUMP files provided: {mol_file} and {f}")
+                return
+            mol_file = f
+            
+    if mol_file is None:
+        print("[Error] No FCIDUMP file provided.")
+        parser.print_help()
+        return
+
+    # Load config from YAML
     import config as run_config
     
-    if not os.path.exists(args.config):
-        print(f"     [Info] Auto-generated default config at {args.config}")
-        run_config.generate_default_yaml(args.config)
+    config_file = config_file or "config/default.yaml"
+    
+    if not os.path.exists(config_file):
+        print(f"     [Info] Auto-generated default config at {config_file}")
+        run_config.generate_default_yaml(config_file)
         
-    config = run_config.load_config(args.config)
+    config = run_config.load_config(config_file)
 
     if config.real_qpu and not config.backend:
         print("\n[Step 0] Discovering IBM Quantum Hardware...")
@@ -80,7 +102,7 @@ def main():
 
     # 1. Classical Prep
     print("\n[Step 1] PySCF Mean-Field Prep...")
-    mf = tools.fcidump.to_scf(args.mol_file)
+    mf = tools.fcidump.to_scf(mol_file)
     mf.kernel()
     patch_abstract_orbitals(mf)
     
@@ -98,7 +120,7 @@ def main():
     elif norb <= config.qpu_threshold:
         print(f"System ({norb} orbitals) <= Max QPU Capacity ({config.qpu_threshold}).")
         print("Routing directly to Quantum Solver (SPIRAL) without fragmentation...")
-        result = quantum_solver.run(mf, config)
+        result = quantum_solver.run(mf, config, custom_circuit_path=custom_circuit_path)
         total_energy = result.energy
         valid_ratio = result.metadata.get("valid_ratio", "N/A")
         
@@ -132,8 +154,9 @@ def main():
     meta_table.add_column("Value")
     meta_table.add_row("Started:", start_timestamp.strftime('%Y-%m-%d %H:%M:%S'))
     meta_table.add_row("Time Elapsed:", formatted_duration)
-    meta_table.add_row("Molecule System:", os.path.basename(args.mol_file))
+    meta_table.add_row("Molecule System:", os.path.basename(mol_file))
     meta_table.add_row("Total Orbitals:", str(norb))
+    meta_table.add_row("Injected Circuit:", os.path.basename(custom_circuit_path) if custom_circuit_path else "None")
     
     # Config Info
     config_table = Table(show_header=False, box=None)
@@ -235,12 +258,25 @@ def main():
         run_details_table.add_row(" -> QPU Fallback:", str(result.metadata["fallback_fragments"]))
         run_details_table.add_row(" -> Skipped:", str(result.metadata["skipped_fragments"]))
         
+    q_table = None
+    if "circuit_depth" in result.metadata:
+        q_table = Table(show_header=False, box=None)
+        q_table.add_column("Key", width=WIDTH)
+        q_table.add_column("Value")
+        q_table.add_row("Circuit Depth:", str(result.metadata.get("circuit_depth", "N/A")))
+        two_q_label = f"{result.metadata.get('two_q_gate_name', 'CX')} Gates:"
+        q_table.add_row(two_q_label, str(result.metadata.get("two_q_count", "N/A")))
+        q_table.add_row("SWAP Gates:", str(result.metadata.get("swap_count", "N/A")))
+        q_table.add_row("Top Bitstrings:", result.metadata.get("top_bitstrings", "N/A"))
+
     main_table = Table(show_edge=False, show_header=False, expand=False)
     main_table.add_column()
     main_table.add_row(Panel(meta_table, title="[bold]Summary"))
     main_table.add_row(Panel(config_table, title="[bold]Configurations"))
     if run_details_table:
         main_table.add_row(Panel(run_details_table, title="[bold]Execution"))
+    if q_table:
+        main_table.add_row(Panel(q_table, title="[bold]Quantum Execution"))
     main_table.add_row(Panel(res_table, title="[bold]Results"))
     
     console.print("\n")

@@ -1,6 +1,6 @@
 qpu_threshold: 40
 classical_threshold: 20
-fci_threshold: 6
+fci_threshold: 10
 ewf_bath_type: mp2
 ewf_truncation: 1.0e-05
 spiral_chunk_size: 1000
@@ -10,6 +10,7 @@ tuning_top_candidates: 3
 tuning_sim_threshold: 20
 beta: 0.001
 min_count: 1
+transpile_optimization_level: 1
 use_spiral: true
 use_spanning_tree: true
 real_qpu: false
