@@ -266,7 +266,8 @@ def run(mf, config, t1=None, t2=None, norb=None, nelec=None, h1e=None, h2e=None,
             return SolverResult(energy=0.0)
 
     # 4. SPIRAL parse and compile
-    if getattr(config, "use_spiral", False) and py_spiral_quantum is not None:
+    # Custom circuits are already compiled to basis gates and bypass SPIRAL entirely.
+    if getattr(config, "use_spiral", False) and py_spiral_quantum is not None and not custom_circuit_path:
         spiral_gates = parse_circuit_to_spiral(frag_qc)
         
         # Full SABRE bypass: pass spanning tree edges to SPIRAL virtual_coupling.

@@ -15,7 +15,7 @@ python3 -m venv spindle_env
 source spindle_env/bin/activate
 
 # Install required Python dependencies
-pip install qiskit qiskit-ibm-runtime pyscf rustworkx ffsim maturin pyyaml
+pip install "qiskit<2.5" "numpy<2" qiskit-ibm-runtime pyscf rustworkx ffsim maturin pyyaml qiskit-addon-sqd qc-pyci
 ```
 
 ### 3. Compiling SPIRAL

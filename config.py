@@ -12,14 +12,14 @@ class RunConfig:
     ewf_bath_type: str = "mp2"          # Method used to surround and protect the fragments.
     ewf_truncation: float = 1e-5        # How much surrounding noise to ignore when splitting.
 
-    # SPIRAL
+    # SPIRAL (disabled for custom circuits)
     spiral_chunk_size: int = 1000       # How many gates to pack into a single bundle so SPIRAL doesn't crash.
     spiral_max_gates: int = 100000      # The absolute max number of gates allowed before we give up.
 
     # Auto-tuning
     num_layouts: int = 50               # How many different ways to try placing the circuit onto the QPU.
     tuning_top_candidates: int = 3      # How many layouts survive the fast heuristic filter to enter simulation tie-breaker.
-    tuning_sim_threshold: int = 20      # Max qubits for simulation tie-breaker. Circuits larger than this skip simulation. Setting to 0 always skips. WARNING: Can silently stall pipeline for hours if set aggressively on underpowered hardware.
+    tuning_sim_threshold: int = 20      # Max qubits for simulation tie-breaker. Larger circuits skip simulation.
     beta: float = 0.001                 # Helps the program pick the most accurate QPU layout.
     min_count: int = 1                  # Throw away quantum results that occur less than this.
 
