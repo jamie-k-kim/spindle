@@ -10,10 +10,9 @@ __pycache__/
 private/
 .venv/
 venv/
-FCIDUMP/*
+
 config/*
 !config/default.yaml
-circuits/*
 
 # Rust build artifacts
 py-spiral-quantum/target/
